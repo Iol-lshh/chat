@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test chat</title>
+</head>
+<body>
+    <div id="chat-body"></div>
+    <label for="contents-input"></label><input id="contents-input" type="text"/>
+</body>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+    let chatBodyData = []
+    const initChatBody = async () => {
+        const response = await requestChatBody()
+        chatBodyData = response.map(row => row.contents).join("<br>")
+        refreshChatBody()
+    }
+    const refreshChatBody = () => {
+        chatBody.innerHTML = chatBodyData
+    }
+
+    const REQUEST_URL = 'http://127.0.0.1:8078';
+    const USER_ID = 1;
+    const requestChatBody = async  () => {
+        console.log(REQUEST_URL + `/chat/${USER_ID}/list`)
+        const response = await axios.get(REQUEST_URL + `/chat/${USER_ID}/list`);
+        return response.data
+    }
+    const sendChat = async () => {
+        console.log(contentsInput.value)
+        await axios.post(REQUEST_URL + `/chat/send`,
+            params = {
+                sender: 1,
+                receiver: 2,
+                contents: contentsInput.value,
+            },
+            {
+                withCredentials: true,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                }
+            })
+        await initChatBody()
+    }
+    const sendChatBySocket = () => {
+        var chat = {
+            sender: 1,
+            receiver: 2,
+            contents: contentsInput.value,
+        };
+
+        // Send message to '/chat/send' destination (where @MessageMapping handles the message)
+        stompClient.send("/chat/send", Date.now(), JSON.stringify(chat));
+    }
+
+    (function(){
+        chatBody = document.querySelector("#chat-body")
+        contentsInput = document.querySelector("#contents-input")
+
+        contentsInput.addEventListener("keypress", e => {
+            if(e.keyCode === 13){
+                sendChatBySocket()
+            }
+        })
+
+        initChatBody()
+
+        socket = new SockJS('http://localhost:8078/chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to '/topic/chats' destination (where @SendTo sends the message)
+            stompClient.subscribe('/1/list', async function (messageOutput) {
+                const messageObject = JSON.parse(messageOutput.body);
+                console.log('Received: ' + messageObject);
+                await initChatBody()
+            });
+        });
+    }())
+
+
+</script>
+</html>

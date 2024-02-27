@@ -1,0 +1,28 @@
+# server
+server:
+  port: 8078
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# Spring
+spring:
+  aop:
+    auto: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant-path-matcher
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2KB
+      max-file-size: 300MB
+      max-request-size: 315MB
+      location: /DATA/upload
+
+springdoc:
+  api-docs:
+    enabled: true

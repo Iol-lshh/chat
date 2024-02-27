@@ -9,12 +9,16 @@ class Database {
 
     fun saveChat(chat: Chat): Int {
         Thread.sleep(Math.random().toLong() * 300L + 100)
-        db[chat.id] = chat
+        db[maxChatId() + 1] = chat
         return 1
     }
 
     fun listChat(user: Long): List<Chat> {
         Thread.sleep(Math.random().toLong() * 100L + 100)
         return db.values.filter { it.receiver == user || it.sender == user }
+    }
+
+    fun maxChatId(): Long {
+        return db.keys.maxOrNull() ?: 0
     }
 }
