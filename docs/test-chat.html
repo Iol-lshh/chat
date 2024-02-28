@@ -44,7 +44,7 @@
                     'Content-Type': 'application/json',
                 }
             })
-        await initChatBody()
+        // await initChatBody()
     }
     const sendChatBySocket = () => {
         var chat = {
@@ -54,20 +54,12 @@
         };
 
         // Send message to '/chat/send' destination (where @MessageMapping handles the message)
-        stompClient.send("/chat/send", Date.now(), JSON.stringify(chat));
+        stompClient.send("/chat/message", Date.now(), JSON.stringify(chat));
     }
 
     (function(){
         chatBody = document.querySelector("#chat-body")
         contentsInput = document.querySelector("#contents-input")
-
-        contentsInput.addEventListener("keypress", e => {
-            if(e.keyCode === 13){
-                sendChatBySocket()
-            }
-        })
-
-        initChatBody()
 
         socket = new SockJS('http://localhost:8078/chat');
         stompClient = Stomp.over(socket);
@@ -75,12 +67,20 @@
             console.log('Connected: ' + frame);
 
             // Subscribe to '/topic/chats' destination (where @SendTo sends the message)
-            stompClient.subscribe('/1/list', async function (messageOutput) {
+            stompClient.subscribe('/sub/chat', function (messageOutput) {
                 const messageObject = JSON.parse(messageOutput.body);
                 console.log('Received: ' + messageObject);
-                await initChatBody()
+                initChatBody()
             });
         });
+
+        contentsInput.addEventListener("keypress", e => {
+            if(e.keyCode === 13){
+                sendChat()
+            }
+        })
+
+        initChatBody()
     }())
 
 

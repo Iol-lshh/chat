@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 @Service
 class ChatService(val repository: ChatRepository) {
-    fun send(chat: ChatComand): Int {
+    fun save(chat: ChatComand): Chat {
         val newChat = Chat(
                 sender = chat.sender,
                 receiver = chat.receiver,
@@ -13,7 +13,8 @@ class ChatService(val repository: ChatRepository) {
                 registed = LocalDateTime.now(),
                 notReadedCnt = 1
         )
-        return repository.save(newChat)
+        repository.save(newChat)
+        return newChat
     }
 
     fun readChats(userId: Long): List<Chat> {
