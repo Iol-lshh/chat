@@ -57,10 +57,7 @@
         stompClient.send("/chat/message", Date.now(), JSON.stringify(chat));
     }
 
-    (function(){
-        chatBody = document.querySelector("#chat-body")
-        contentsInput = document.querySelector("#contents-input")
-
+    const connectChatSocket = () => {
         socket = new SockJS('http://localhost:8078/chat');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
@@ -74,12 +71,22 @@
             });
         });
 
+        socket.onclose = () => {
+            setTimeout(connectChatSocket, 1000);
+        }
+    }
+
+    (function(){
+        chatBody = document.querySelector("#chat-body")
+        contentsInput = document.querySelector("#contents-input")
+
         contentsInput.addEventListener("keypress", e => {
             if(e.keyCode === 13){
                 sendChat()
             }
         })
 
+        connectChatSocket()
         initChatBody()
     }())
 

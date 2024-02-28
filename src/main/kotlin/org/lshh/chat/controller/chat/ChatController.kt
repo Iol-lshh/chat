@@ -4,7 +4,6 @@ import org.lshh.chat.domain.chat.Chat
 import org.lshh.chat.domain.chat.ChatComand
 import org.lshh.chat.domain.chat.ChatService
 import org.slf4j.LoggerFactory
-import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.*
 
