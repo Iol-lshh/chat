@@ -5,6 +5,9 @@
     <title>test chat</title>
 </head>
 <body>
+    <label for="sender-input">sender</label><input id="sender-input" type="text"/>
+    <label for="receiver-input">receiver</label><input id="receiver-input" type="text"/>
+    <button onclick="setSocket()">연결</button>
     <div id="chat-body"></div>
     <label for="contents-input"></label><input id="contents-input" type="text"/>
 </body>
@@ -12,10 +15,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script>
-    let chatBodyData = []
-    const initChatBody = async () => {
-        const response = await requestChatBody()
-        chatBodyData = response.map(row => row.contents).join("<br>")
+    // socket = new SockJS('http://localhost:8078/chat');  https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js
+    // stompClient = Stomp.over(socket);  https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js
+
+    let room = {};
+    let chatBodyData = [];
+    let senderId = 0;
+    let receiverId = 0;
+    const initChatBody = async (roomId) => {
+        const response = await requestChatBody(roomId)
+        chatBodyData = response.map(row => `${row.sender}: ${row.contents}`).join("<br>")
         refreshChatBody()
     }
     const refreshChatBody = () => {
@@ -23,19 +32,20 @@
     }
 
     const REQUEST_URL = 'http://127.0.0.1:8078';
-    const USER_ID = 1;
-    const requestChatBody = async  () => {
-        console.log(REQUEST_URL + `/chat/${USER_ID}/list`)
-        const response = await axios.get(REQUEST_URL + `/chat/${USER_ID}/list`);
+
+    const requestChatBody = async  (roomId) => {
+        console.log(REQUEST_URL + `/chat/${roomId}/list`)
+        const response = await axios.get(REQUEST_URL + `/chat/${roomId}/list`);
         return response.data
     }
-    const sendChat = async () => {
+    const sendChat = async (sender, receiver, room) => {
         console.log(contentsInput.value)
         await axios.post(REQUEST_URL + `/chat/send`,
             params = {
-                sender: 1,
-                receiver: 2,
+                sender: sender,
+                receiver: receiver,
                 contents: contentsInput.value,
+                room: room
             },
             {
                 withCredentials: true,
@@ -46,48 +56,72 @@
             })
         // await initChatBody()
     }
-    const sendChatBySocket = () => {
-        var chat = {
-            sender: 1,
-            receiver: 2,
-            contents: contentsInput.value,
-        };
 
-        // Send message to '/chat/send' destination (where @MessageMapping handles the message)
-        stompClient.send("/chat/message", Date.now(), JSON.stringify(chat));
-    }
-
-    const connectChatSocket = () => {
+    const connectChatSocket = (roomId) => {
         socket = new SockJS('http://localhost:8078/chat');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
 
             // Subscribe to '/topic/chats' destination (where @SendTo sends the message)
-            stompClient.subscribe('/sub/chat/', function (messageOutput) {
+            stompClient.subscribe('/sub/chat/' + roomId, function (messageOutput) {
                 const messageObject = JSON.parse(messageOutput.body);
                 console.log('Received: ' + messageObject);
-                initChatBody()
+                initChatBody(roomId)
             });
         });
 
         socket.onclose = () => {
-            setTimeout(connectChatSocket, 1000);
+            setTimeout(connectChatSocket, 5000);
         }
     }
 
-    (function(){
+    const findUnicastRoomId = async (senderId, receiverId) => {
+        const response = await axios.get(REQUEST_URL + `/room/unicast/${senderId}/${receiverId}`);
+        return response.data
+    }
+
+    const setSocket = async () => {
+        try{
+            room = await findUnicastRoomId(senderId, receiverId)
+            connectChatSocket(room.id)
+            initChatBody(room.id)
+        }catch (e) {
+            console.log("소켓연결실패 "+e);
+        }
+
+    }
+
+    (async function(){
         chatBody = document.querySelector("#chat-body")
         contentsInput = document.querySelector("#contents-input")
+        senderInput = document.querySelector("#sender-input")
+        receiverInput =  document.querySelector("#receiver-input")
 
-        contentsInput.addEventListener("keypress", e => {
-            if(e.keyCode === 13){
-                sendChat()
+
+        senderInput.addEventListener("change", e=>{
+            senderId = senderInput.value
+            receiverId = receiverInput.value
+        })
+        senderInput.addEventListener("keypress", e => {
+            if(e.keyCode === 13) {
+                setSocket()
             }
         })
-
-        connectChatSocket()
-        initChatBody()
+        receiverInput.addEventListener("change", e=>{
+            senderId = senderInput.value
+            receiverId = receiverInput.value
+        })
+        receiverInput.addEventListener("keypress", e => {
+            if(e.keyCode === 13) {
+                setSocket()
+            }
+        })
+        contentsInput.addEventListener("keypress", e => {
+            if(e.keyCode === 13){
+                sendChat(senderId, receiverId, room.id)
+            }
+        })
     }())
 
 

@@ -1,24 +1,17 @@
 package org.lshh.chat.infra
 
-import org.lshh.chat.domain.chat.Chat
-import org.springframework.stereotype.Component
+import java.util.concurrent.locks.ReentrantLock
 
-@Component
-class Database {
-    private val db: HashMap<Long, Chat> = HashMap()
+abstract class Database<T>() {
+    protected val db: HashMap<Long, T> = HashMap()
+    protected val sequence =  ReentrantLock()
 
-    fun saveChat(chat: Chat): Int {
-        Thread.sleep(Math.random().toLong() * 300L + 100)
-        db[maxChatId() + 1] = chat
-        return 1
-    }
-
-    fun listChat(user: Long): List<Chat> {
+    open fun find(id: Long):T?{
         Thread.sleep(Math.random().toLong() * 100L + 100)
-        return db.values.filter { it.receiver == user || it.sender == user }
+        return db[id]
     }
-
-    fun maxChatId(): Long {
-        return db.keys.maxOrNull() ?: 0
+    open fun findAll():Collection<T>{
+        Thread.sleep(Math.random().toLong() * 100L + 100)
+        return db.values
     }
 }
