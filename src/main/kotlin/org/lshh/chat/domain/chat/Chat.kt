@@ -20,7 +20,6 @@ class Chat(
                     receiver = command.receiver,
                     room = command.room,
                     contents = command.contents,
-                    registed = LocalDateTime.now(),
                     notReadedCnt = 1
             )
         }
