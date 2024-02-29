@@ -2,16 +2,15 @@ package org.lshh.chat.infra.chat
 
 import org.lshh.chat.domain.chat.Chat
 import org.lshh.chat.domain.chat.ChatRepository
-import org.lshh.chat.infra.Database
 import org.springframework.stereotype.Repository
 
 @Repository
-class ChatRepositoryImplement(val database: Database): ChatRepository {
+class ChatRepositoryImplement(val database: ChatDatabase): ChatRepository {
     override fun save(chat: Chat): Int {
-        return database.saveChat(chat)
+        return database.save(chat)
     }
 
-    override fun findByUserId(userId: Long): List<Chat> {
-        return database.listChat(userId)
+    override fun findByRoomId(roomId: Long): List<Chat> {
+        return database.findByRoom(roomId)
     }
 }
