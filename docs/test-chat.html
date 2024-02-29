@@ -64,7 +64,7 @@
             console.log('Connected: ' + frame);
 
             // Subscribe to '/topic/chats' destination (where @SendTo sends the message)
-            stompClient.subscribe('/sub/chat', function (messageOutput) {
+            stompClient.subscribe('/sub/chat/', function (messageOutput) {
                 const messageObject = JSON.parse(messageOutput.body);
                 console.log('Received: ' + messageObject);
                 initChatBody()

@@ -1,19 +1,17 @@
 package org.lshh.chat.domain.chat
 
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class ChatService(val repository: ChatRepository) {
-    fun save(chat: ChatComand): Chat {
-        val newChat = Chat(
-                sender = chat.sender,
-                receiver = chat.receiver,
-                contents = chat.contents,
-                registed = LocalDateTime.now(),
-                notReadedCnt = 1
-        )
-        repository.save(newChat)
+    fun save(commnad: ChatComand): Chat {
+        val newChat = Chat.create(commnad)
+        val resultCnt = repository.save(newChat)
+
+        if(resultCnt == 0){
+            throw RuntimeException("저장 불가")
+        }
+
         return newChat
     }
 
