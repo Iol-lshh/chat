@@ -1,7 +1,7 @@
 # 개요
 - [웹소켓 방식 채팅](https://github.com/Iol-lshh/chat/tree/feature/spring-web)
 - [SSE 방식 채팅](https://github.com/Iol-lshh/chat/tree/feature/spring-webflux)
-- [프런트](https://github.com/Iol-lshh/chat/blob/main/docs/test-chat.html)
+- [프런트](./docs/test-chat.html)
     - 브랜치마다 프런트가 변경된다.
 
 # 개념
