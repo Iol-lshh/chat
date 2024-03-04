@@ -6,4 +6,6 @@ interface RoomRepository {
     fun find(room: Long): Room?
     fun save(room: Room): Room
     fun findAll(): List<Room>
+    fun drop(id: Long)
+    fun dropAll()
 }

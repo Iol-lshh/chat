@@ -17,4 +17,21 @@ class RoomService (private val repository: RoomRepository){
         return repository.findAll()
     }
 
+    fun participate(roomId:Long): Room{
+        var room = repository.find(roomId)
+        if(room == null){
+            room = Room.create(roomId)
+            room = repository.save(room)
+        }
+        return room
+    }
+
+    fun drop(roomId: Long){
+        repository.drop(roomId)
+    }
+
+    fun dropAll(){
+        repository.dropAll()
+    }
+
 }

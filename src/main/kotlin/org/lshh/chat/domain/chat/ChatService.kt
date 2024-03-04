@@ -4,13 +4,12 @@ import org.lshh.chat.domain.chat.dto.ChatCommand
 import org.lshh.chat.domain.room.RoomRepository
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import java.time.LocalDateTime
 
 @Service
 class ChatService(
-        val repository: ChatRepository,
-        private val roomRepository: RoomRepository
+        private val repository: ChatRepository,
+        private val roomRepository: RoomRepository,
+        private val chatPubSub: ChatPubSub
 ) {
     fun unicast(command: ChatCommand): Chat {
         val room = roomRepository.findUnicastByUsers(command.sender, command.receiver)
@@ -34,10 +33,10 @@ class ChatService(
     }
 
     fun publish(chat: Chat){
-        // todo publish
+        chatPubSub.publish(chat)
     }
 
     fun subscribe(roomId: Long): Flux<Chat> {
-        return repository.stream(roomId)
+        return chatPubSub.subscribe(roomId)
     }
 }

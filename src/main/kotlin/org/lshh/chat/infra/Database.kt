@@ -14,4 +14,14 @@ abstract class Database<T> {
         Thread.sleep(Math.random().toLong() * 100L + 100)
         return db.values
     }
+
+    fun remove(id: Long) {
+        Thread.sleep(Math.random().toLong() * 300L + 100)
+        db.remove(id)
+    }
+
+    fun removeAll() {
+        Thread.sleep(Math.random().toLong() * 300L + 100)
+        db.clear()
+    }
 }

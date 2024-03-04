@@ -2,15 +2,17 @@ package org.lshh.chat.infra.chat
 
 import org.lshh.chat.domain.chat.Chat
 import org.lshh.chat.domain.chat.ChatPubSub
+import org.springframework.stereotype.Component
 import reactor.core.publisher.Flux
 
-class ChatPubSubImplement(val messageQueue:ChatMessageQueue): ChatPubSub {
+@Component
+class ChatPubSubImplement(val mq:ChatMessageQueue): ChatPubSub {
     override fun publish(chat: Chat) {
-        TODO("Not yet implemented")
+        mq.publish(chat.room, chat)
     }
 
     override fun subscribe(roomId: Long): Flux<Chat> {
-        TODO("Not yet implemented")
+        return mq.subscribe(roomId)
     }
 
 }

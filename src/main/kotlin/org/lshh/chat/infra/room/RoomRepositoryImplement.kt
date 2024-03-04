@@ -22,4 +22,12 @@ class RoomRepositoryImplement(val database: RoomDatabase): RoomRepository {
     override fun findAll(): List<Room> {
         return database.findAll().toList()
     }
+
+    override fun drop(id: Long) {
+        database.remove(id)
+    }
+
+    override fun dropAll() {
+        database.removeAll()
+    }
 }
